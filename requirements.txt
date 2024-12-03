@@ -1,0 +1,7 @@
+dgl==1.1.2
+emoji==2.12.1
+pytorch==2.0.0
+scikit-learn==1.2.2
+numpy==1.23.5
+ninja==1.10.2
+tqdm==4.65.0
