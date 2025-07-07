@@ -29,7 +29,13 @@ import scipy.sparse as sp
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import data_util
+try:
+    from . import data_util
+except ImportError:
+    try:
+        import gcc.datasets.data_util as data_util
+    except ImportError:
+        import data_util
 
 ######################################################################
 # Overview of Link Prediction with GNN

@@ -10,9 +10,16 @@ import numpy as np
 import torch
 from dgl.data import AmazonCoBuy, Coauthor
 try:
-    import gcc.datasets.data_util as data_util
-except:
-    import data_util as data_util
+    from . import data_util
+except ImportError:
+    try:
+        import gcc.datasets.data_util as data_util
+    except ImportError:
+        import sys
+        import os
+        # Add the current directory to the path to find data_util
+        sys.path.insert(0, os.path.dirname(__file__))
+        import data_util
 import random
 def worker_init_fn(worker_id):
     worker_info = torch.utils.data.get_worker_info()

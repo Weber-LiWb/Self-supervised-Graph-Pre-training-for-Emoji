@@ -10,9 +10,12 @@ import numpy as np
 import torch
 from dgl.data import AmazonCoBuy, Coauthor
 try:
-    import gcc.datasets.data_util as data_util
-except:
-    import data_util as data_util
+    from . import data_util
+except ImportError:
+    try:
+        import gcc.datasets.data_util as data_util
+    except ImportError:
+        import data_util
 import random
 def worker_init_fn(worker_id):
     worker_info = torch.utils.data.get_worker_info()

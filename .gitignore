@@ -43,6 +43,9 @@ venv.bak/
 .ipynb_checkpoints
 *.ipynb
 
+# PDF
+*.pdf
+
 # Distribution / packaging
 .Python
 build/
@@ -90,3 +93,6 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/ 
+
+# weights
+moco_True_linkpred_True/
