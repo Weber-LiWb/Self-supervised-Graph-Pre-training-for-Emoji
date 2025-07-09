@@ -91,14 +91,16 @@ This document summarizes the comprehensive code review and testing performed on 
 
 ### Required for Full Functionality
 ```python
-torch>=1.9.0
-dgl>=0.9.0
-transformers>=4.0.0
-openai>=0.27.0      # Optional, for OpenAI API
+torch==2.0.0
+dgl==1.1.2
+transformers>=4.20.0
+openai==1.3.0       # Optional, for OpenAI API
 anthropic>=0.3.0    # Optional, for Anthropic API
 sqlite3             # Usually built-in
-jieba>=0.42.1       # For Chinese text processing
-scikit-learn>=1.0.0
+jieba==0.42.1       # For Chinese text processing
+scikit-learn==1.2.2
+numpy==1.23.5
+pandas>=1.3.0
 ```
 
 ### Currently Available (Testing Environment)
@@ -115,10 +117,15 @@ scikit-learn>=1.0.0
 4. **API Integration**: Ready for OpenAI/Anthropic integration
 
 ### Next Steps for Full Deployment
-1. **Install Dependencies**: `pip install -r requirements.txt`
+1. **Install Dependencies**: `pip install -r requirements.txt` (updated with new dependencies)
 2. **Load GNN Checkpoint**: Verify `moco_True_linkpred_True/current.pth`
 3. **Configure API Keys**: Set `OPENAI_API_KEY` or `ANTHROPIC_API_KEY`
 4. **Test with Real Data**: Connect to `xhs_data.db` database
+
+### Requirements.txt Updates Made
+- ✅ Added `transformers>=4.20.0` for tokenizers and text embeddings
+- ✅ Added `anthropic>=0.3.0` for Claude API support  
+- ✅ Verified existing dependencies are compatible and up-to-date
 
 ## 💡 Usage Examples
 
