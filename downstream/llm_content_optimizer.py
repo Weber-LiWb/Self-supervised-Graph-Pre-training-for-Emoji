@@ -332,29 +332,47 @@ class LLMContentOptimizer:
         original_content = content_match.group(1).strip()
         suggested_emojis = emoji_match.group(1).strip() if emoji_match else "😍✨💕"
         
+        # First, remove any existing emojis from the content to avoid duplication
+        clean_content = re.sub(r'[\U0001F600-\U0001F64F\U0001F300-\U0001F5FF\U0001F680-\U0001F6FF\U0001F1E0-\U0001F1FF\u2600-\u26FF\u2700-\u27BF]', '', original_content).strip()
+        
         # Simple mock optimization: add emojis strategically
-        sentences = original_content.split('。')
+        sentences = clean_content.split('。')
         optimized_sentences = []
         
         emoji_list = re.findall(r'[\U0001F600-\U0001F64F\U0001F300-\U0001F5FF\U0001F680-\U0001F6FF\U0001F1E0-\U0001F1FF\u2600-\u26FF\u2700-\u27BF]', suggested_emojis)
         if not emoji_list:
             emoji_list = ["😍", "✨", "💕"]
         
+        # Ensure we have enough unique emojis
+        if len(emoji_list) < 3:
+            default_emojis = ["😍", "✨", "💕", "💯", "🔥"]
+            for emoji in default_emojis:
+                if emoji not in emoji_list:
+                    emoji_list.append(emoji)
+                if len(emoji_list) >= 3:
+                    break
+        
+        emoji_used = set()
         for i, sentence in enumerate(sentences):
             sentence = sentence.strip()
             if sentence:
-                # Add emoji to some sentences
-                if i == 0 and len(emoji_list) > 0:  # First sentence
-                    sentence = f"{sentence} {emoji_list[0]}"
-                elif i == len(sentences) - 2 and len(emoji_list) > 1:  # Last meaningful sentence
-                    sentence = f"{sentence} {emoji_list[1]}"
-                elif len(sentence) > 20 and len(emoji_list) > 2:  # Long sentences
-                    sentence = f"{sentence} {emoji_list[2]}"
+                # Add emoji to some sentences, ensuring no duplicates
+                emoji_to_use = None
+                if i == 0:  # First sentence
+                    emoji_to_use = emoji_list[0] if emoji_list[0] not in emoji_used else None
+                elif i == len(sentences) - 2 and len(sentences) > 1:  # Last meaningful sentence
+                    emoji_to_use = next((e for e in emoji_list[1:] if e not in emoji_used), None)
+                elif len(sentence) > 20:  # Long sentences
+                    emoji_to_use = next((e for e in emoji_list if e not in emoji_used), None)
+                
+                if emoji_to_use:
+                    sentence = f"{sentence} {emoji_to_use}"
+                    emoji_used.add(emoji_to_use)
                 
                 optimized_sentences.append(sentence)
         
         optimized_content = '。'.join(optimized_sentences)
-        if not optimized_content.endswith('。') and original_content.endswith('。'):
+        if not optimized_content.endswith('。') and clean_content.endswith('。'):
             optimized_content += '。'
             
         return optimized_content
