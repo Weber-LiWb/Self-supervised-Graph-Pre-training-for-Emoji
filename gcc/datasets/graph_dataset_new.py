@@ -763,10 +763,20 @@ class NodeClassificationDatasetv2(NodeClassificationDataset):
             fan_out[edge]=num_neighbor
             self.fan_outs.append(fan_out)
         self.sampler = dgl.dataloading.NeighborSampler(self.fan_outs, edge_dir='in')
+        
+        # Create backup sampler for word nodes or general fallback
         if etype[-1] == 'word':
             self.fan_outs[1]['hasw']=num_neighbor//2
             self.fan_outs[1]['by']=num_neighbor//2
             self.sampler_bk = dgl.dataloading.NeighborSampler(self.fan_outs, edge_dir='in')
+        else:
+            # Create a more relaxed sampler as fallback
+            fallback_fan_outs = []
+            for edge in metapath:
+                fan_out = edge_fanout.copy()
+                fan_out[edge] = max(1, num_neighbor // 2)  # Use smaller neighbor count
+                fallback_fan_outs.append(fan_out)
+            self.sampler_bk = dgl.dataloading.NeighborSampler(fallback_fan_outs, edge_dir='in')
     def __set_seed__(self, subg, ntype):
         ntypes = subg.ntypes
         nnodes = [subg.num_nodes(n) for n in ntypes]
@@ -784,9 +794,13 @@ class NodeClassificationDatasetv2(NodeClassificationDataset):
         graph_idx, node_idx = self._convert_idx(idx)
         other_node_idx = node_idx
         ntype = self.etype[-1]
-        subg = self.graphs[0].subgraph(self.sampler.sample(self.graphs[0], {ntype:[node_idx]})[0])
+        
+        # Convert node_idx to tensor for DGL sampler
+        node_idx_tensor = torch.tensor([node_idx], device=self.device)
+        
+        subg = self.graphs[0].subgraph(self.sampler.sample(self.graphs[0], {ntype: node_idx_tensor})[0])
         if subg.num_edges() == 0:
-            subg = self.graphs[0].subgraph(self.sampler_bk.sample(self.graphs[0], {ntype:[node_idx]})[0])
+            subg = self.graphs[0].subgraph(self.sampler_bk.sample(self.graphs[0], {ntype: node_idx_tensor})[0])
         subg = self.__set_seed__(subg, ntype)
         graph_q = dgl.to_homogeneous(subg, ['feat', 'seed'])
         if self.positional_embedding_size > 0:
